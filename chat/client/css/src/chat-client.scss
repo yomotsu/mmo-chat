@@ -1,0 +1,268 @@
+/* ==========================================================================
+   Section comment block
+   ========================================================================== */
+
+/* Sub-section comment block
+   ========================================================================== */
+
+/* Basic comment */
+
+
+
+@import url( https://fonts.googleapis.com/css?family=Josefin+Slab );
+
+$font: 'Josefin Slab', serif;
+
+html, body{
+	width: 100%;
+	height: 100%;
+}
+body{
+	margin: 0;
+	font-family: sans-serif;
+}
+
+
+
+/* ==========================================================================
+   button
+   ========================================================================== */
+.game-button{
+	color: #FFF;
+	font-family: $font;
+	font-size: 20px;
+	cursor: pointer;
+	position: relative;
+	height: 56px;
+	padding: 0 20px;
+	border: none;
+	background: none;
+	&:before,
+	&:after{
+		content: '';
+		position: absolute;
+		top: 0;
+		display: block;
+		width: 54px;
+		height: 56px;
+	}
+	&:before{left: 0px; }
+	&:after {right: 0px; }
+	&.game-button--disabled{
+		color: #666;
+		cursor: not-allowed;
+	}
+}
+	.game-button__inner{
+		text-align: center;
+		line-height: 56px;
+		display: block;
+		height: 56px;
+		padding: 0 60px;
+		background-position: 50% 50%;
+		background-size: 100% 56px;
+	}
+	.game-button:before {background-image: url( '../img/button/1l.png' );}
+	.game-button:after  {background-image: url( '../img/button/1r.png' );}
+	.game-button__inner {background-image: url( '../img/button/1m.png' );}
+
+	.game-button:hover:before {background-image: url( '../img/button/3l.png' );}
+	.game-button:hover:after  {background-image: url( '../img/button/3r.png' );}
+	.game-button:hover .game-button__inner {background-image: url( '../img/button/3m.png' );}
+
+	.game-button.game-button--disabled:before,
+	.game-button.game-button--disabled:before:hover {background-image: url( '../img/button/2l.png' );}
+	.game-button.game-button--disabled:after,
+	.game-button.game-button--disabled:after:hover {background-image: url( '../img/button/2r.png' );}
+	.game-button.game-button--disabled       .game-button__inner,
+	.game-button.game-button--disabled:hover .game-button__inner {background-image: url( '../img/button/2m.png' );}
+
+
+
+/* ==========================================================================
+   buttonContainer
+   ========================================================================== */
+.game-buttonContainer{
+	margin: 20px 0;
+	&:last-child{
+		margin-bottom: 0;
+	}
+	ul{
+		list-style: none;
+		text-align: center;
+		padding: 0;
+		margin: 0;
+	}
+		li{
+			display: inline-block;
+			margin: 0 10px;
+		}
+}
+
+
+/* ==========================================================================
+   uiFrame
+   ========================================================================== */
+.game-uiFrame{
+	position: relative;
+	background: url( '../img/frame/9.jpg' );
+	padding: 20px;
+	background-clip:content-box;
+	margin: 10px;
+	display: table;
+}
+	.game-uiFrame:before,
+	.game-uiFrame:after,
+	.game-uiFrame__inner:before,
+	.game-uiFrame__inner:after{
+		content: '';
+		position: absolute;
+		display: block;
+		width: 70px;
+		height: 70px;
+	}
+	.game-uiFrame:before{
+		top: -6px;
+		left: -6px;
+		background: url( '../img/frame/1.png' );
+	}
+	.game-uiFrame:after{
+		top: -6px;
+		right: -6px;
+		background: url( '../img/frame/3.png' );
+	}
+	.game-uiFrame__inner:before{
+		bottom: -6px;
+		right: -6px;
+		background: url( '../img/frame/5.png' );
+	}
+	.game-uiFrame__inner:after{
+		bottom: -6px;
+		left: -6px;
+		background: url( '../img/frame/7.png' );
+	}
+	.game-uiFrame__inner{
+		padding: 60px;
+		margin: -20px;
+		background: url( '../img/frame/8.png' ) repeat-y bottom left,
+		            url( '../img/frame/6.png' ) repeat-x bottom right,
+		            url( '../img/frame/4.png' ) repeat-y top right,
+		            url( '../img/frame/2.png' ) repeat-x top left;
+	}
+
+/* ==========================================================================
+   overlay
+   ========================================================================== */
+.game-overlay{}
+	.game-overlay__inner{
+		display: flex;
+		position: fixed;
+		z-index: 1;
+	  align-items: center;
+	  justify-content: center;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+	}
+		.game-overlay__main{
+			margin: auto;
+		}
+	.game-overlay__bg{
+		position: fixed;
+		z-index: 0;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		background: rgba( 0, 0, 0, 0.75 );
+	}
+
+
+/* ==========================================================================
+   select
+   ========================================================================== */
+.game-select{
+	text-align: center;
+	form{
+		margin: 0;
+	}
+}
+	.game-select__text{
+		font-family: $font;
+		font-size: 24px;
+		margin-bottom: 10px;
+	}
+		input.game-select__nameInput{
+			font-size: 20px;
+			line-height: 20px;
+			vertical-align: middle;
+			box-sizing: border-box;
+			height: 30px;
+			padding: 5px;
+		}
+		select.game-select__typeInput{
+			font-size: 20px;
+			line-height: 20px;
+			vertical-align: middle;
+			box-sizing: border-box;
+			height: 30px;
+		}
+
+
+/* ==========================================================================
+   chat
+   ========================================================================== */
+.game-chat{
+	position: absolute;
+	bottom: 0;
+	left: 0;
+}
+	.game-chat__log{
+		color: #FFF;
+		font-size: 14px;
+		font-family: sans-serif;
+		line-height: 1.4;
+		box-sizing: border-box;
+		width: 300px;
+		height: 40vh;
+		max-height: 400px;
+		padding: 8px 8px 2px;
+		border: 1px solid #252525;
+		margin-bottom: 1px;
+		overflow: auto;
+		background: rgba( 0, 0, 0, .75 );
+		
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+		.game-chat__logItem{}
+
+	form.game-chat__form{}
+	form.game-chat__form input{
+		color: #fff;
+		font-size: 12px;
+		font-family: sans-serif;
+		line-height: 24px;
+		box-sizing: border-box;
+		height: 24px;
+		width: 100%;
+		outline: none;
+		padding: 0 6px;
+		border: 1px solid #252525;
+		border-bottom: 1px solid #5F5C5D;
+		border-radius: 2px;
+		box-shadow: inset 1px 0 3px 3px rgba( 10, 10, 10, 0.8 );
+		background: #3F3532;
+	}
+
+
+
+/* ==========================================================================
+   rendererContainer
+   ========================================================================== */
+.game-rendererContainer{
+	display: block;
+	width: 100%;
+	height: 100%;
+}
