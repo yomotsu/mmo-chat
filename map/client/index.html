@@ -10,6 +10,10 @@ canvas{display: block;}
 </head>
 <body>
 
+<script src="js/lib/jquery-2.1.4.min.js"></script>
+<script src="js/lib/underscore-min.js"></script>
+<script src="js/lib/backbone-min.js"></script>
+<script src="js/lib/bluebird.min.js"></script>
 <script src="js/lib/three.min.js"></script>
 <script src="js/lib/meshwalk.min.js"></script>
 <script src="js/lib/meshwalk.TPS.min.js"></script>
@@ -337,18 +341,25 @@ MOC.view3d = {
     socket.on( 'playerleft', function ( id ) {
 
       // TODO idから要素を取り除く仕組みを作る
-      console.log( id );
+      that.dispose( id );
       // app.playersData.remove( id );
 
     } );
 
   },
 
-  dispose: function ( player ) {
+  dispose: function ( id ) {
 
-    var pool = this.world.characterPool;
-    pool.splice( pool.indexOf( player.controller ), 1 );
-    this.scene.remove( player.object ); // cloneされたメッシュ
+    var playerPool  = this.playerPool;
+    var world       = this.world.characterPool;
+    var scene       = this.scene
+    var playerIndex = _.findIndex( playerPool, { id: id } );
+    var player      = playerPool[ playerIndex ];
+
+    playerPool.splice( playerPool.indexOf( player ), 1 );
+    world.splice( world.indexOf( player.controller ), 1 );
+    scene.remove( player.mesh );
+    // player.nameTexture
 
   }
 
@@ -361,7 +372,7 @@ var count = 0;
 ;( function update () {
 
   count++;
-  if(count===900){return;}
+  if(count===400){return;}
 
   requestAnimationFrame( update );
   var delta = MOC.view3d.clock.getDelta();
