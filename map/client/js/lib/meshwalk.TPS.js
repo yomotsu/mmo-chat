@@ -941,6 +941,7 @@ MW.AnimationController.prototype.play = function ( name ) {
     this._pointerLast.y = this.lat;
     this.el.removeEventListener( 'mousemove', this._mousedragListener, false );
     this.el.addEventListener( 'mousemove', this._mousedragListener, false );
+    document.body.className += ' js-TPSCameraDragging';
 
   }
 
@@ -948,6 +949,7 @@ MW.AnimationController.prototype.play = function ( name ) {
 
     this.dispatchEvent( { type: 'mouseup' } );
     this.el.removeEventListener( 'mousemove', this._mousedragListener, false );
+    document.body.className = document.body.className.replace( / js-TPSCameraDragging/, '' );
 
   }
 

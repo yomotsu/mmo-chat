@@ -30,6 +30,7 @@ gulp.task( 'browser-sync', function () {
 gulp.task( 'js', function () {
 
   return gulp.src( [
+          './js/src/MOC.js',
           './js/src/chat-client.js'
          ] )
          .pipe( plumber() )

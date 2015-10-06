@@ -1,19 +1,62 @@
-var playperModel = new ( Backbone.Model.extend( {
+MOC.playperModel = new ( Backbone.Model.extend( {
   defaults: {
-    name: null,
-    type: null,
+    chatID: null,
+    // mapID : null,
+    name  : null,
+    type  : null,
+    lastChatTimeStamp: null,
     isChatMode: false
   },
   initialize: function ( attrs, options ) {
 
-  },
-  validate: function ( attrs ) {
-
   }
 } ) );
 
-var socket = io( 'http://localhost:3002', { transports: [ 'websocket' ] } );
-// var socket = io( 'http://***.azurewebsites.net', { transports: [ 'websocket' ] } );
+MOC.OtherPlayperModel = Backbone.Model.extend( {
+
+  defaults: {
+    chatID: null,
+    // mapID : null,
+    name  : null,
+    type  : null,
+    lastChatTimeStamp: null,
+  },
+
+  initialize: function ( attrs, options ) {
+
+  }
+
+} );
+
+MOC.otherPlayperList = new ( Backbone.Collection.extend( {
+
+    model: MOC.OtherPlayperModel,
+
+    fetchPlayers: function ( players ) {
+
+      for ( var i in players ) {
+
+        this.add( {
+          chatID: players[ i ].chatID,
+          mapID : players[ i ].mapID,
+          name  : players[ i ].name,
+          type  : players[ i ].type
+        } );
+
+      }
+
+    },
+
+    removeById: function ( id ) {
+
+      // this.remove()
+      console.log( this.models );
+      console.log( id );
+
+    }
+
+} ) );
+
 
 ////////////////////////////////
 //
@@ -21,7 +64,7 @@ var socket = io( 'http://localhost:3002', { transports: [ 'websocket' ] } );
 //
 ////////////////////////////////
 
-var flow_select = function( val ) {
+MOC.flow_select = function( val ) {
 
   return new Promise( function( onFulfilled, onRejected ) {
 
@@ -124,7 +167,7 @@ var flow_select = function( val ) {
 
       }
 
-      playperModel.set( {
+      MOC.playperModel.set( {
         name: $name.val(),
         type: $type.val()
       } );
@@ -144,9 +187,12 @@ var flow_select = function( val ) {
 ////////////////////////////////
 
 
-var flow_startgame = function () {
+MOC.flow_startgame = function () {
 
   return new Promise( function( onFulfilled, onRejected ) {
+
+    var socket = io( 'http://localhost:3002', { transports: [ 'websocket' ] } );
+    // var socket = io( 'http://***.azurewebsites.net', { transports: [ 'websocket' ] } );
 
     var template = [
       '<div class="game-chat">',
@@ -173,22 +219,40 @@ var flow_startgame = function () {
 
     var addLine = ( function () {
 
-	    var template = _.template( [
-	      '<div class="game-chat__logItem game-chat__logItem--<%= data.type %>">',
-	        '<%= _.escape( data.name ) %> : <%= _.escape( data.text ) %>',
-	      '</div>'
-	    ].join( '' ) );
+      var template = _.template( [
+        '<div class="game-chat__logItem game-chat__logItem--<%= data.chatType %>">',
+          '<%= _.escape( data.name ) %> : <%= _.escape( data.text ) %>',
+        '</div>'
+      ].join( '' ) );
 
-	    return function ( data ) {
+      return function ( data ) {
 
-	      var html = template( { data: data } );
-	      $log.append( $( html ) );
+        var html = template( { data: data } );
+        $log.append( $( html ) );
 
-	      $log.scrollTop( 1e10 );
+        $log.scrollTop( 1e10 );
 
       }
 
     } )();
+
+    var putPlayerChat = function ( data ) {
+
+      var expire = 2500; // in ms
+      var $chatBallon = $( '#playerchat-' + data.chatID );
+      $chatBallon.html( _.escape( data.text ) );
+
+      setTimeout( function () {
+
+        if ( pcModel.get( 'lastChatTimeStamp' ) + expire <= Date.now() ) {
+
+          $chatBallon.empty();
+
+        }
+
+      }, expire );
+      
+    }
 
     //
     // when press the Enter key
@@ -202,9 +266,9 @@ var flow_startgame = function () {
       }
 
       e.preventDefault();
-      playperModel.set( { 'isChatMode': !playperModel.get( 'isChatMode' ) } );
+      MOC.playperModel.set( { 'isChatMode': !MOC.playperModel.get( 'isChatMode' ) } );
 
-      if ( playperModel.get( 'isChatMode' ) ) {
+      if ( MOC.playperModel.get( 'isChatMode' ) ) {
         
         $input.focus();
         return;
@@ -216,13 +280,12 @@ var flow_startgame = function () {
         if ( $input.val() !== '' ) {
 
           var data = {
-            name: playperModel.get( 'name' ),
-            text: $input.val(),
+            chatID  : MOC.playperModel.get( 'chatID' ),
+            name    : MOC.playperModel.get( 'name' ),
+            text    : $input.val(),
             position: null,
-            type: 'say'
+            chatType: 'say'
           }
-
-          console.log( data );
 
           socket.emit( 'msg', data );
           $input.val( '' );
@@ -234,29 +297,70 @@ var flow_startgame = function () {
     }
 
     $( window ).on( 'keypress', onEnterPress );
-    socket.on( 'msg', function( data ) { addLine( data ); } );
+    $input.on( 'focus', function () {
+
+      MOC.playperModel.set( { 'isChatMode': true } );
+      // console.log( MOC.playperModel.get( 'isChatMode' ) );
+
+    } );
+    $input.on( 'blur', function () {
+
+      MOC.playperModel.set( { 'isChatMode': false } );
+      // console.log( MOC.playperModel.get( 'isChatMode' ) );
+
+    } );
+
+    socket.on('connect', function() {
+
+      var data = {
+        name : MOC.playperModel.get( 'name' ),
+        type : MOC.playperModel.get( 'type' )
+      };
+
+      socket.emit( 'addnewplayer', data );
+
+    } );
+
+    socket.on( 'myChatID', function( data ) {
+      
+      // 自分のchatIDと、接続済みの他のプレイやーの全データが返ってくる
+      MOC.playperModel.set( { chatID: data.chatID } );
+      MOC.otherPlayperList.fetchPlayers( data.players );
+      onFulfilled();
+
+    } );
+
+    socket.on( 'msg', function( data ) {
+
+      // console.log( data.timeStamp, data );
+
+      if ( MOC.playperModel.get( 'chatID' ) === data.chatID ) {
+
+        pcModel = MOC.playperModel;
+
+      } else {
+
+        pcModel = MOC.otherPlayperList.findWhere( { chatID: data.chatID } );
+
+      }
+
+      pcModel.set( { 'lastChatTimeStamp': Date.now() } );
+      
+      addLine( data );
+      putPlayerChat( data );
+
+    } );
+
+    // TODO 途中で他プレイヤーがきた時の処理として、MOC.otherPlayperListに追加する
+
+    socket.on( 'playerleft', function ( id ) {
+
+      MOC.otherPlayperList.removeById( id );
+
+    } );
 
   } );
 
 }
-
-
-
-
-////////////////////////////////
-//
-// 全体まとめ
-//
-////////////////////////////////
-
-
-$( function () {
-
-  Promise.resolve()
-  .then( flow_select )
-  .then( flow_startgame )
-
-} )
-
 
 

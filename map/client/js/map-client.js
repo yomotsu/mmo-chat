@@ -30,9 +30,10 @@ MOC.util.cssTransform = function ( el, value ) {
 
 MOC.PlayerCharacter3D = function ( params ) {
 
-  this.id   = params.id; // socket.io 側で発行
-  this.name = params.name;
-  this.mesh = new THREE.Mesh(
+  this.id     = params.id; // socket.io 側で発行
+  this.chatID = params.chatID;
+  this.name   = params.name;
+  this.mesh   = new THREE.Mesh(
     new THREE.SphereGeometry( MOC.PlayerCharacter3D.PLAYER_RADIUS, 16, 16 ),
     new THREE.MeshBasicMaterial( { color: 0xff0000,  wireframe: true} )
   );
@@ -42,7 +43,7 @@ MOC.PlayerCharacter3D = function ( params ) {
   this.DOMBlock = document.createElement( 'div' );
   this.DOMBlock.classList.add( 'MOC-view3d__playerDOMBlock' );
   this.DOMBlock.innerHTML = [
-    '<div class="MOC-view3d__playerChat" id="' + this.id + '">ああああいいいううう</div>',
+    '<div class="MOC-view3d__playerChat" id="playerchat-' + this.chatID + '"></div>',
   ].join( '' );
 
   this.nameSprite = MOC.PlayerCharacter3D.generateNameSprite( this.name );
@@ -156,8 +157,9 @@ MOC.view3d = {
     var that = this;
     this.playerCharacter = new MOC.PlayerCharacter3D( {
       // id は、自キャラでは後でsocketでかえってきた情報を使う
-      name: 'yomotsu',
-      type: 1
+      chatID: MOC.playperModel.get( 'chatID' ),
+      name  : MOC.playperModel.get( 'name' ),
+      type  : MOC.playperModel.get( 'type' )
     } );
     this.scene.add( this.playerCharacter.mesh );
     this.world.add( this.playerCharacter.characterController );
@@ -179,8 +181,10 @@ MOC.view3d = {
 
     // bind events
     this.playerCharacter.characterController.inputTimeout = null;
-    this.keyInputControl.addEventListener( 'movekeyhold',    function () {
+    this.keyInputControl.addEventListener( 'movekeyhold', function () {
 
+      if ( MOC.playperModel.get( 'isChatMode' ) ) { return; };
+      
       that.playerCharacter.characterController.inputTimeout = null;
       that.playerCharacter.characterController.isRunning = true;
 
@@ -224,9 +228,10 @@ MOC.view3d = {
   addOtherPlayer: function ( data ) {
 
     var otherPlayerCharacter = new MOC.PlayerCharacter3D( {
-      id:   data.id,
-      name: data.name,
-      type: data.type
+      id    : data.id,
+      chatID: data.chatID,
+      name  : data.name,
+      type  : data.type
     } );
     this.scene.add( otherPlayerCharacter.mesh );
     this.world.add( otherPlayerCharacter.characterController );
@@ -241,7 +246,7 @@ MOC.view3d = {
     var loader = new THREE.JSONLoader();
     var box, terrain;
 
-    loader.load( 'terrain.json', function( geo, mat ) {
+    loader.load( MOC.MAP_ROOT_DIR + 'terrain.json', function( geo, mat ) {
 
       box = new THREE.Mesh(
         new THREE.BoxGeometry( 14, 1, 5 ),
@@ -353,8 +358,9 @@ MOC.view3d = {
 
       //自分の状態をサーバに送る
       socket.emit( 'addnewplayer', {
-        name     : that.playerCharacter.name,
-        type     : that.playerCharacter.type,
+        chatID   : MOC.playperModel.get( 'chatID' ),
+        name     : MOC.playperModel.get( 'name' ),
+        type     : MOC.playperModel.get( 'type' ),
         position : [
           that.playerCharacter.characterController.center.x,
           that.playerCharacter.characterController.center.y,
@@ -463,13 +469,18 @@ MOC.view3d = {
 
   dispose: function ( id ) {
 
-    var playerPool  = this.playerPool;
-    var world       = this.world.characterPool;
-    var scene       = this.scene
+    // parents
+    var playerPool   = this.playerPool;
+    var world        = this.world.characterPool;
+    var scene        = this.scene;
+    var DOMContainer = this.DOMContainer;
+
+    // children
     var playerIndex = _.findIndex( playerPool, { id: id } );
     var player      = playerPool[ playerIndex ];
     var nameSprite  = player.nameSprite;
-    var nameTexture = player.nameSprite.material.map
+    var nameTexture = player.nameSprite.material.map;
+    var DOMBlock    = player.DOMBlock;
 
     player.mesh.remove( nameTexture );
     nameTexture.dispose();
@@ -478,6 +489,7 @@ MOC.view3d = {
     playerPool.splice( playerPool.indexOf( player ), 1 );
     world.splice( world.indexOf( player.controller ), 1 );
     scene.remove( player.mesh );
+    DOMContainer.removeChild( DOMBlock );
 
   }
 

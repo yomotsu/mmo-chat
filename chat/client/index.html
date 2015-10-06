@@ -12,29 +12,15 @@
 <script src="./js/lib/backbone-min.js"></script>
 <script src="./js/lib/bluebird.min.js"></script>
 <script src="http://localhost:3002/socket.io/socket.io.js"></script>
-<script src="js/chat-client.min.js"></script>
+<script src="js/chat-client.js"></script>
 
 <script>
-$( function () {
 
-	var $rendererContainer = $( '.game-rendererContainer' );
+Promise.resolve()
+.then( MOC.flow_select )
+.then( MOC.flow_startgame )
 
-	var onmousewheel = function ( e ) {
-
-		e.preventDefault();
-
-	}
-
-	// $rendererContainer.on( 'mousewheel',     onmousewheel );
-	// $rendererContainer.on( 'DOMMouseScroll', onmousewheel );
-
-} );
 </script>
-
-
-
-<div class="game-rendererContainer"></div>
-
 
 
 </body>

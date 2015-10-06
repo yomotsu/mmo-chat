@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>=^.^=</title>
+<link rel="stylesheet" href="chat/client/css/chat-client.min.css">
+<link rel="stylesheet" href="map/client/css/map-client.css">
+<style>
+body{
+	background: url( 'img/cover.jpg' );
+	background-size: cover;
+	background-position: 50% 100%;
+	overflow: hidden;
+}
+</style>
+</head>
+<body>
+<!-- <audio autoloop autoplay loop>
+	<source src="audio/PathtoLakeLand.mp3">
+	<source src="audio/PathtoLakeLand.ogg">
+</audio> -->
+
+<div class="MOC-view3d"></div>
+
+<script src="map/client/js/lib/jquery-2.1.4.min.js"></script>
+<script src="map/client/js/lib/underscore-min.js"></script>
+<script src="map/client/js/lib/backbone-min.js"></script>
+<script src="map/client/js/lib/bluebird.min.js"></script>
+<script src="map/client/js/lib/three.min.js"></script>
+<script src="map/client/js/lib/meshwalk.min.js"></script>
+<script src="map/client/js/lib/meshwalk.TPS.min.js"></script>
+
+<script src="http://localhost:3002/socket.io/socket.io.js"></script>
+<script src="chat/client/js/chat-client.js"></script>
+
+<script src="http://localhost:3004/socket.io/socket.io.js"></script>
+<script src="map/client/js/map-client.js"></script>
+
+<script>
+MOC.MAP_ROOT_DIR = './map/client/';
+
+Promise.resolve()
+.then( MOC.flow_select )
+.then( MOC.flow_startgame )
+.then( function () {
+
+  MOC.view3d.init( document.querySelector( '.MOC-view3d' ) );
+  MOC.view3d.connect();
+
+  var count = 0;
+  ;( function update () {
+
+    // count++;
+    // if(count===900){return;}
+
+    requestAnimationFrame( update );
+    var delta = MOC.view3d.clock.getDelta();
+    MOC.view3d.update.bind( MOC.view3d )();
+    MOC.view3d.render( delta );
+    MOC.view3d.renderDOM();
+
+  } )();
+
+} );
+
+</script>
+</body>
+</html>
